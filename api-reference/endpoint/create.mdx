@@ -1,4 +1,132 @@
 ---
-title: 'Create Plant'
-openapi: 'POST /plants'
+title: "Criar um novo Pagamento"
+openapi: "POST /plants"
 ---
+
+Permite que você crie um link de cobrança para seu cliente pagar. Você pode escolher entre PIX, cartão de crédito ou boleto.
+
+**POST** `https://api.seedpay.com.br/api/payments/create`
+
+## Autorizações
+
+Sem necessidade de autenticação. O pagamento é vinculado através do hash da oferta.
+
+## Body
+
+**offerHash** `string` **required**\
+Hash da oferta com 8 caracteres. Obtido da URL /pay/:hash.
+
+**paymentMethod** `string` **required**\
+Método de pagamento desejado. Valores aceitos: `pix`, `credit_card`, `boleto`
+
+**customer** `object` **required**\
+Dados do cliente que irá pagar.
+
+**paymentData** `object`\
+Dados específicos para cartão de crédito (opcional).
+
+### customer `object`
+
+**name** `string` **required**\
+Nome completo do cliente.
+
+**email** `string` **required**\
+Email válido do cliente.
+
+**cpf** `string`\
+CPF do cliente (obrigatório para PIX e boleto).
+
+**address** `object`\
+Endereço completo (obrigatório para boleto).
+
+### address `object`
+
+**zipCode** `string` **required**\
+CEP sem formatação. Exemplo: "01310100"
+
+**street** `string` **required**\
+Nome da rua.
+
+**number** `string` **required**\
+Número do endereço.
+
+**neighborhood** `string` **required**\
+Bairro.
+
+**city** `string` **required**\
+Cidade.
+
+**state** `string` **required**\
+Estado com 2 letras. Exemplo: "SP"
+
+### paymentData `object`
+
+**token** `string` **required**\
+Token do cartão gerado pelo MercadoPago.
+
+**installments** `number` **required**\
+Número de parcelas (1-12).
+
+Exemplo:
+
+```json
+[
+  {
+    "offerHash": "abc12345",
+    "paymentMethod": "pix",
+    "customer": {
+      "name": "João Silva", 
+      "email": "test@testuser.com",
+      "cpf": "99999999999"
+    }
+  }
+]
+```
+
+## Response
+
+**payment** `object`\
+Dados do pagamento criado.
+
+**paymentInfo** `object`\
+Informações específicas do método escolhido.
+
+Exemplo:
+
+```json
+{
+  "payment": {
+    "id": "payment_123",
+    "status": "pending",
+    "amount": 4950,
+    "paymentMethod": "pix"
+  },
+  "paymentInfo": {
+    "qrCode": "data:image/png;base64,...",
+    "qrCodeText": "00020101021226900014...",
+    "pixUrl": "https://www.mercadopago.com.br/payments/123/ticket"
+  }
+}
+```
+
+## Erros
+
+**400** - Dados inválidos
+
+**404** - Oferta não encontrada ou expirada
+
+**429** - Rate limited (muitas tentativas)
+
+Exemplo de erro:
+
+```json
+{
+  "error": "Dados inválidos", 
+  "details": [
+    {
+      "path": ["customer", "email"],
+      "message": "Invalid email format"
+    }
+  ]
+}
+```
