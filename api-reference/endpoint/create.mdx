@@ -94,7 +94,8 @@ Informações específicas do método escolhido.
 Exemplo:
 
 <RequestExample>
-```json
+
+```bash
 {
   "payment": {
     "id": "payment_123",
@@ -109,6 +110,20 @@ Exemplo:
   }
 }
 ```
+
+
+``` File 2
+{
+  "error": "Dados inválidos", 
+  "details": [
+    {
+      "path": ["customer", "email"],
+      "message": "Invalid email format"
+    }
+  ]
+}
+```
+
 </RequestExample>
 
 ## Erros
